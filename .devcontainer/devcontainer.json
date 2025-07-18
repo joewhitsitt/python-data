@@ -1,0 +1,26 @@
+{
+    "name": "python-data-dev",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "workspaceFolder": "/app",
+    "mounts": [
+        "source=${localWorkspaceFolder}/data,target=/app/data,type=bind"
+    ],
+    "settings": {
+        "python.pythonPath": "/usr/local/bin/python",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "ms-toolsai.jupyter",
+        "mechatroner.rainbow-csv"
+    ],
+    "postCreateCommand": "pip install -r requirements.txt"
+}

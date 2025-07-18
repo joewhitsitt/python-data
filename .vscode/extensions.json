@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python", // language support for Python
+        "ms-python.vscode-pylance", // lan
+        "ms-azuretools.vscode-docker", // Docker support (works with Colima)
+        "esbenp.prettier-vscode", // code formatting
+        "ms-toolsai.jupyter", // Jupyter notebook support
+        "mechatroner.rainbow-csv" // CSV file support
+    ]
+}
