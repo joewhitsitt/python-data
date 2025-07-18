@@ -7,19 +7,21 @@ A containerized Python environment for processing files with pandas.
 ```
 python-data
 ├── .devcontainer/
-│   ├── devcontainer.json    # VS Code dev container configuration
-│   └── Dockerfile           # Dockerfile for the dev container (matches app Dockerfile)
+│   ├── devcontainer.json            # VS Code dev container configuration
+│   └── Dockerfile                   # Dockerfile for the dev container (matches app Dockerfile)
 ├── .vscode/
-│   ├── extensions.json      # Recommended VS Code extensions
-│   └── settings.json        # Workspace-specific settings
-├── data/                    # Data input/output files are stored here. .gitignored.
+│   ├── extensions.json              # Recommended VS Code extensions
+│   └── settings.json                # Workspace-specific settings
+├── data/                            # Data input/output files are stored here. .gitignored.
 ├── src/
-│   └── drop_incomplete.py   # Simple script to remove incomplete rows.
-├── .gitignore               # Ignore directories and files from being included in a Git repository.
-├── Dockerfile               # Dockerfile for building the application image
-├── entrypoint.sh            # Terminal prompt script.
-├── README.md                # Project documentation
-└── requirements.txt         # Python dependencies
+│   └── combine_workbook_sheets.py   # Combine sheets within an Excel workbook based on `key` column.
+│   └── drop_incomplete.py           # Simple script to remove incomplete rows.
+│   └── web_inventory_cleanup.py     # Multi-step cleanup: Removes non-viewable types from Content Type column.
+├── .gitignore                       # Ignore directories and files from being included in a Git repository.
+├── Dockerfile                       # Dockerfile for building the application image
+├── entrypoint.sh                    # Terminal prompt script.
+├── README.md                        # Project documentation
+└── requirements.txt                 # Python dependencies
 ```
 
 ## Prerequisites
