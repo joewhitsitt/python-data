@@ -16,7 +16,7 @@ python-data
 ├── src/
 │   └── combine_workbook_sheets.py   # Combine sheets within an Excel workbook based on `key` column.
 │   └── drop_incomplete.py           # Simple script to remove incomplete rows.
-│   └── web_inventory_cleanup.py     # Multi-step cleanup: Removes non-viewable types from Content Type column.
+│   └── web_inventory_cleanup.py     # Multi-step cleanup: Removes non-viewable types from Content Type column, copies Redirect URL value.
 ├── .gitignore                       # Ignore directories and files from being included in a Git repository.
 ├── Dockerfile                       # Dockerfile for building the application image
 ├── entrypoint.sh                    # Terminal prompt script.
