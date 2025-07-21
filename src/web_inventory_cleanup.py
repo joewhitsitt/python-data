@@ -131,7 +131,10 @@ def tag_row_from_rules(row):
         if substr in row["Reverse Domain"]:
             tags.add(tag)
     for substr, tag in tag_rules.get("title_contains", {}).items():
-        if substr.lower() in row.get("Title 1", "").lower():
+        if substr in row.get("Title 1", ""):
+            tags.add(tag)
+    for substr, tag in tag_rules.get("extractor_contains", {}).items():
+        if substr.lower() in row.get("Extractor 1 1", "").lower():
             tags.add(tag)
     for tag in tags & extra_loop_tags:
         domain = row["Reverse Domain"]
