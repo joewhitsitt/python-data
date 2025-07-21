@@ -67,6 +67,18 @@ mask_b = (
 df.loc[mask_b, "Processed"] = "HTTP Upgrade"
 redirect_mask |= mask_b
 
+# C. HTTP → HTTPS duplicate check.
+# Drop the http version if there is a matching https version.
+http_to_https = df["Address"].str.replace("http://", "https://", n=1)
+mask_c = (
+    is_http &
+    http_to_https.isin(all_addresses) &
+    df["Redirect URL"].eq("") &
+    ~df.index.isin(df[redirect_mask].index)
+)
+df.loc[mask_c, "Processed"] = "HTTP Duplicate"
+redirect_mask |= mask_c
+
 redirected_rows = df[redirect_mask]
 df = df[~redirect_mask]
 
