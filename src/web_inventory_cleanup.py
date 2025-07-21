@@ -159,7 +159,7 @@ removed_log = pd.concat([deduped_rows, assets_removed, redirected_rows])
 removed_log.to_csv(REMOVED_LOG, index=False)
 
 # --- Step 7: Final cleanup and save ---
-df.drop(columns=["Content Type Base", "First Path Segment"], inplace=True)
+df.drop(columns=["Content Type Base", "First Path Segment", "Processed"], inplace=True)
 df.to_csv(OUTPUT_CSV, index=False)
 
 print(f"Cleaned file saved to {OUTPUT_CSV}, keeping {len(df)} rows.")
