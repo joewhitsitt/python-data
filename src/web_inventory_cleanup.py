@@ -24,18 +24,23 @@ df.fillna("", inplace=True)
 # --- Clean derived columns ---
 df["Status Code"] = pd.to_numeric(df["Status Code"], errors="coerce")
 df["Crawl Depth"] = pd.to_numeric(df["Crawl Depth"], errors="coerce")
-df["Content Type Base"] = df.get("Content Type", "").str.split(";").str[0].str.strip().str.lower()
+df["Content Type Base"] = (
+    df.get("Content Type", "")
+      .str.split(";").str[0]
+      .str.strip().str.lower()
+      .replace("", pd.NA)
+)
 df["First Path Segment"] = df["Path"].str.strip("/").str.split("/").str[0]
 
 # --- Step 1: De-duplication ---
 dedupe_cols = [c for c in df.columns if c not in NONSTATIC_COLUMNS]
 dup_mask = df.duplicated(subset=dedupe_cols, keep="first")
-deduped_rows = df[dup_mask].assign(Processed="Duplicate")
+deduped_rows = df[dup_mask].assign(Processed="General Duplicate")
 df = df[~dup_mask]
 
 # --- Step 2: Remove non-viewable ---
 asset_mask = (
-    ~df["Content Type Base"].isin(VIEWABLE_TYPES) |
+    (df["Content Type Base"].notna() & ~df["Content Type Base"].isin(VIEWABLE_TYPES)) |
     df["Path"].str.lower().str.endswith(COMMON_ASSET_EXTENSIONS)
 )
 assets_removed = df[asset_mask].assign(Processed="Asset")
@@ -75,10 +80,6 @@ def get_cluster(row):
         return None
     return f"{base}/{row['First Path Segment']}" if row["First Path Segment"] else base
 
-deep_path_mask = df["Crawl Depth"] > 1
-cluster_deep = df[deep_path_mask].assign(Processed="Deep Subpath")
-
-df = df[~deep_path_mask].copy()
 df["Clusters"] = df.apply(get_cluster, axis=1)
 
 # --- Step 5: Tagging ---
@@ -139,7 +140,7 @@ df["Tags"] = df.apply(group_reverse_domain, axis=1)
 
 
 # --- Step 6: Save removed rows ---
-removed_log = pd.concat([deduped_rows, assets_removed, redirected_rows, cluster_deep])
+removed_log = pd.concat([deduped_rows, assets_removed, redirected_rows])
 removed_log.to_csv(REMOVED_LOG, index=False)
 
 # --- Step 7: Final cleanup and save ---
