@@ -18,10 +18,9 @@ COMMON_ASSET_EXTENSIONS = (
 NONSTATIC_COLUMNS = {"Keep?", "Response Time", "Response Header: Date", "Crawl Timestamp"}
 
 # --- Load data ---
-df = pd.read_csv(INPUT_CSV, dtype=str)
-# --- Initial cleanup ---
-df.fillna("", inplace=True)
-# --- Clean derived columns ---
+df = pd.read_csv(INPUT_CSV, dtype=str).fillna("")
+
+# --- Clean data for use ---
 df["Status Code"] = pd.to_numeric(df["Status Code"], errors="coerce")
 df["Crawl Depth"] = pd.to_numeric(df["Crawl Depth"], errors="coerce")
 df["Content Type Base"] = (
@@ -33,12 +32,15 @@ df["Content Type Base"] = (
 df["First Path Segment"] = df["Path"].str.strip("/").str.split("/").str[0]
 
 # --- Step 1: De-duplication ---
+# Identify duplicates based on non-static columns
+# and keep the first occurrence, marking others as duplicates.
 dedupe_cols = [c for c in df.columns if c not in NONSTATIC_COLUMNS]
 dup_mask = df.duplicated(subset=dedupe_cols, keep="first")
 deduped_rows = df[dup_mask].assign(Processed="General Duplicate")
 df = df[~dup_mask]
 
 # --- Step 2: Remove non-viewable ---
+# Identify rows that are not viewable or are static assets
 asset_mask = (
     (df["Content Type Base"].notna() & ~df["Content Type Base"].isin(VIEWABLE_TYPES)) |
     df["Path"].str.lower().str.endswith(COMMON_ASSET_EXTENSIONS)
@@ -67,8 +69,7 @@ mask_b = (
 df.loc[mask_b, "Processed"] = "HTTP Upgrade"
 redirect_mask |= mask_b
 
-# C. HTTP → HTTPS duplicate check.
-# Drop the http version if there is a matching https version.
+# C. HTTP → HTTPS duplicate check
 http_to_https = df["Address"].str.replace("http://", "https://", n=1)
 mask_c = (
     is_http &
@@ -83,8 +84,11 @@ redirected_rows = df[redirect_mask]
 df = df[~redirect_mask]
 
 # --- Step 4: Clustering ---
+# Process known subdirectory clusters.
 with open(CLUSTER_JSON) as f:
     PATH_BASED_CLUSTERS = json.load(f)
+
+cluster_domains = set(PATH_BASED_CLUSTERS.keys())
 
 def get_cluster(row):
     base = PATH_BASED_CLUSTERS.get(row["Reverse Domain"])
