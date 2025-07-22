@@ -98,28 +98,18 @@ def get_cluster(row):
 
 df["Clusters"] = df.apply(get_cluster, axis=1)
 
-# --- Step 5: Tagging ---
-# A. Group by status code.
-def get_status_group(code):
-    if pd.isna(code):
-        return None
-    code = int(code)
-    if code == 200:
-        return "Status: OK"
-    elif 201 <= code <= 299:
-        return "Status: Other Success"
-    elif 300 <= code <= 399:
-        return "Status: Unrepresented Redirect"
-    elif code in (401, 403):
-        return "Status: Access Denied"
-    elif 400 <= code < 500:
-        return "Status: Client Error"
-    elif 500 <= code < 600:
-        return "Status: Server Error"
-    return None
-df["Status Group"] = df["Status Code"].apply(get_status_group)
+# --- Step 5: Canonical row ---
+# For each reverse domain, keep the first row with status code 200.
+domain_counts = df["Reverse Domain"].value_counts()
+multi_domains = domain_counts[domain_counts > 1].index.difference(cluster_domains)
+reverse_domains_200s = df[(df["Reverse Domain"].isin(multi_domains)) & (df["Status Code"] == 200)]
+first_200_keep = reverse_domains_200s.groupby("Reverse Domain", sort=False).head(1)
+domain_subset = df[df["Reverse Domain"].isin(first_200_keep["Reverse Domain"])]
+redundant_rows = domain_subset[~domain_subset.index.isin(first_200_keep.index)].assign(Processed="Redundant Rows")
+df = df.drop(redundant_rows.index)
 
-# B. Tagging based on patterns.
+# --- Step 6: Tagging ---
+# Tag rows based on identified patterns and loop again to include matching reverse domains.
 with open(TAG_JSON) as f:
     tag_rules = json.load(f)
 
@@ -148,7 +138,6 @@ def tag_row_from_rules(row):
 
 df["Tags"] = df.apply(tag_row_from_rules, axis=1)
 
-# Extra loop to tag based on shared reverse domain.
 def group_reverse_domain(row):
     base_tags = row["Tags"] if isinstance(row["Tags"], set) else set()
     extra = domain_tag_map.get(row["Reverse Domain"], set())
@@ -157,12 +146,11 @@ def group_reverse_domain(row):
 
 df["Tags"] = df.apply(group_reverse_domain, axis=1)
 
-
-# --- Step 6: Save removed rows ---
-removed_log = pd.concat([deduped_rows, assets_removed, redirected_rows])
+# --- Step 7: Save removed rows ---
+removed_log = pd.concat([deduped_rows, assets_removed, redirected_rows, redundant_rows])
 removed_log.to_csv(REMOVED_LOG, index=False)
 
-# --- Step 7: Final cleanup and save ---
+# --- Step 8: Final cleanup and save ---
 df.drop(columns=["Content Type Base", "First Path Segment", "Processed"], inplace=True)
 df.to_csv(OUTPUT_CSV, index=False)
 
