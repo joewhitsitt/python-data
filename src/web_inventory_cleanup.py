@@ -110,6 +110,27 @@ df = df.drop(redundant_rows.index)
 
 # --- Step 6: Tagging ---
 # Tag rows based on identified patterns and loop again to include matching reverse domains.
+# A. Group by status code.
+def get_status_group(code):
+    if pd.isna(code):
+        return None
+    code = int(code)
+    if code == 200:
+        return "Status: OK"
+    elif 201 <= code <= 299:
+        return "Status: Other Success"
+    elif 300 <= code <= 399:
+        return "Status: Unrepresented Redirect"
+    elif code in (401, 403):
+        return "Status: Access Denied"
+    elif 400 <= code < 500:
+        return "Status: Client Error"
+    elif 500 <= code < 600:
+        return "Status: Server Error"
+    return None
+df["Status Group"] = df["Status Code"].apply(get_status_group)
+
+# B. Tagging based on patterns.
 with open(TAG_JSON) as f:
     tag_rules = json.load(f)
 
@@ -138,6 +159,7 @@ def tag_row_from_rules(row):
 
 df["Tags"] = df.apply(tag_row_from_rules, axis=1)
 
+# C. Extra loop for reverse domains.
 def group_reverse_domain(row):
     base_tags = row["Tags"] if isinstance(row["Tags"], set) else set()
     extra = domain_tag_map.get(row["Reverse Domain"], set())
