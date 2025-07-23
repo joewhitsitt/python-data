@@ -18,6 +18,7 @@ python-data
 │   └── drop_incomplete.py           # Simple script to remove incomplete rows.
 │   └── web_inventory_cleanup.py     # Multi-step cleanup: Removes duplicates, assets, matched redirects, deep subdirectory paths.
 │                                      Groups by status code and tagging based on identified patterns.
+│                                      Attempts to reduce multiple rows per canonical instance.
 ├── .gitignore                       # Ignore directories and files from being included in a Git repository.
 ├── Dockerfile                       # Dockerfile for building the application image
 ├── entrypoint.sh                    # Terminal prompt script.
