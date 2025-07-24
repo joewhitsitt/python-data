@@ -13,6 +13,7 @@ python-data
 │   ├── extensions.json              # Recommended VS Code extensions
 │   └── settings.json                # Workspace-specific settings
 ├── data/                            # Data input/output files are stored here. .gitignored.
+├── example-data/                    # Example data so you can understand how some of the scripts work.
 ├── src/
 │   └── combine_workbook_sheets.py   # Combine sheets within an Excel workbook based on `key` column.
 │   └── drop_incomplete.py           # Simple script to remove incomplete rows.

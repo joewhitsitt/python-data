@@ -1,0 +1,37 @@
+{
+  "address_contains": {
+    "/ePrint/": "Printer",
+    "/camera/index.html": "Camera"
+  },
+  "reverse_domain_contains": {
+    ".dev.": "DEV Environment",
+    "prt": "Printer",
+    "extron": "AV Equipment"
+  },
+  "title_contains": {
+    "Dell": "Printer",
+    "Epson": "Printer",
+    "EPSON": "Printer",
+    "HP ": "Printer",
+    "Brother": "Printer",
+    "Lexmark": "Printer",
+    "Xerox": "Printer",
+    "AXIS": "Camera",
+    "Poly - Configuration Utility": "Phone",
+    "FileMaker": "FileMaker",
+    "Welcome to nginx": "Nginx Server"
+  },
+  "extractor_contains": {
+    "SiteNow": "SiteNow"
+  },
+    "extra_loop": [
+        "Printer",
+        "Camera",
+        "DEV Environment",
+        "Phone",
+        "AV Equipment",
+        "FileMaker",
+        "Nginx Server",
+        "SiteNow"
+    ]
+}
