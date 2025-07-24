@@ -32,7 +32,16 @@ df["Content Type Base"] = (
 df["First Path Segment"] = df["Path"].str.strip("/").str.split("/").str[0]
 
 # --- Step 1: De-duplication ---
-# Identify duplicates based on non-static columns
+
+# A. Identify and remove HTTP versions that have a matching HTTPS version.
+all_addresses = set(df["Address"])
+is_http = df["Address"].str.startswith("http://")
+https_version = df["Address"].str.replace("http://", "https://", n=1)
+http_dupes_mask = is_http & https_version.isin(all_addresses)
+http_removed = df[http_dupes_mask].assign(Processed="HTTP version")
+df = df[~http_dupes_mask]
+
+# B. Identify duplicates based on non-static columns
 # and keep the first occurrence, marking others as duplicates.
 dedupe_cols = [c for c in df.columns if c not in NONSTATIC_COLUMNS]
 dup_mask = df.duplicated(subset=dedupe_cols, keep="first")
@@ -169,7 +178,7 @@ def group_reverse_domain(row):
 df["Tags"] = df.apply(group_reverse_domain, axis=1)
 
 # --- Step 7: Save removed rows ---
-removed_log = pd.concat([deduped_rows, assets_removed, redirected_rows, redundant_rows])
+removed_log = pd.concat([http_removed, deduped_rows, assets_removed, redirected_rows, redundant_rows])
 removed_log.to_csv(REMOVED_LOG, index=False)
 
 # --- Step 8: Final cleanup and save ---
